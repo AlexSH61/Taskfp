@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/AlexSH61/Taskfp/grud"
+	"github.com/AlexSH61/first-project/grud"
 )
 
 func main() {
