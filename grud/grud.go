@@ -178,7 +178,7 @@ func DeleteTask(tasks *TaskList) {
 
 	FindTasks(tasks)
 
-	fmt.Print("Enter task number to delete: ")
+	fmt.Print("Enter task id to delete: ")
 	fmt.Scanln(&id)
 
 	if id < 1 || id > len(tasks.Tasks) {
