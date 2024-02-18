@@ -3,20 +3,23 @@ package main
 import (
 	"fmt"
 
-	"github.com/AlexSH61/Taskfp/grud"
+	grud "github.com/AlexSH61/Taskfp/grud"
 )
 
 func main() {
-	var tasks grud.TaskList
-	grud.LoadTasks(&tasks)
+	// Create a TaskList instance
+	tasks := grud.NewTaskList()
 
-	number := 0
 	for {
+		// Display menu
 		grud.ShowMenu()
-		fmt.Scanln(&number)
-		grud.HandleChoice(number, &tasks)
-		if number == 5 {
-			break
-		}
+
+		// Get user choice
+		var choice int
+		fmt.Print("Enter your choice: ")
+		fmt.Scanln(&choice)
+
+		// Handle user choice
+		grud.HandleChoice(choice, &tasks)
 	}
 }

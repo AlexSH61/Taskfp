@@ -8,10 +8,12 @@ import (
 )
 
 type Task struct {
-	ID        int       `json:"id"`
-	Title     string    `json:"title"`
-	Status    string    `json:"status"`
-	CreatedAt time.Time `json:"created_at"`
+	ID         int       `json:"id"`
+	Title      string    `json:"title"`
+	Status     string    `json:"status"`
+	CreateTime time.Time `json:"create_time"`
+	UpdateTime time.Time `json:"update_time"`
+	DueDate    time.Time `json:"due_date"`
 }
 
 type TaskList struct {
@@ -84,6 +86,7 @@ func SaveTasks(tasks *TaskList) {
 
 func AddTask(tasks *TaskList) {
 	var title, status string
+	var dueDateStr string
 
 	fmt.Print("Enter task title: ")
 	fmt.Scanln(&title)
@@ -91,11 +94,21 @@ func AddTask(tasks *TaskList) {
 	fmt.Print("Enter task status: ")
 	fmt.Scanln(&status)
 
+	fmt.Print("Enter due date (YYYY-MM-DD): ")
+	fmt.Scanln(&dueDateStr)
+	dueDate, err := time.Parse("2006-01-02", dueDateStr)
+	if err != nil {
+		fmt.Println("Invalid date format. Task will be added without a due date.")
+		dueDate = time.Time{}
+	}
+
 	newTask := Task{
-		ID:        len(tasks.Tasks) + 1,
-		Title:     title,
-		Status:    status,
-		CreatedAt: time.Now(),
+		ID:         len(tasks.Tasks) + 1,
+		Title:      title,
+		Status:     status,
+		CreateTime: time.Now(),
+		UpdateTime: time.Now(),
+		DueDate:    dueDate,
 	}
 
 	tasks.Tasks = append(tasks.Tasks, newTask)
@@ -115,8 +128,13 @@ func FindTasks(tasks *TaskList) {
 	fmt.Println("Task list:")
 	for _, task := range tasks.Tasks {
 		if filterStatus == "" || task.Status == filterStatus {
-			fmt.Printf("%d. %s (Status: %s, Created At: %s)\n",
-				task.ID, task.Title, task.Status, task.CreatedAt.Format("2006-01-02 15:04:05"))
+			dueDateStr := ""
+			if !task.DueDate.IsZero() {
+				dueDateStr = task.DueDate.Format("2006-01-02")
+			}
+
+			fmt.Printf("%d. %s (Status: %s, Due Date: %s, Created At: %s, Updated At: %s)\n",
+				task.ID, task.Title, task.Status, dueDateStr, task.CreateTime.Format("2006-01-02 15:04:05"), task.UpdateTime.Format("2006-01-02 15:04:05"))
 		}
 	}
 }
@@ -124,6 +142,7 @@ func FindTasks(tasks *TaskList) {
 func UpdateTask(tasks *TaskList) {
 	var id int
 	var newStatus string
+	var newDueDateStr string
 
 	FindTasks(tasks)
 
@@ -138,8 +157,20 @@ func UpdateTask(tasks *TaskList) {
 	fmt.Print("Enter new status for the task: ")
 	fmt.Scanln(&newStatus)
 
-	tasks.Tasks[id-1].Status = newStatus
-	fmt.Println("Task status successfully updated.")
+	fmt.Print("Enter new due date (YYYY-MM-DD) or press Enter to skip: ")
+	fmt.Scanln(&newDueDateStr)
+	newDueDate, err := time.Parse("2006-01-02", newDueDateStr)
+	if err != nil {
+		fmt.Println("Invalid date format. Due date will not be updated.")
+		newDueDate = time.Time{}
+	}
+
+	task := &tasks.Tasks[id-1]
+	task.Status = newStatus
+	task.DueDate = newDueDate
+	task.UpdateTime = time.Now()
+
+	fmt.Println("Task status and due date successfully updated.")
 }
 
 func DeleteTask(tasks *TaskList) {
